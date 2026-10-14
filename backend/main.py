@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException
-from parsers import api, crowdstrike, firewall, network
+from fastapi import FastAPI, HTTPException, UploadFile, File
+import json
+from parsers import api, crowdstrike, firewall, network, aws, m365, ad
 import storage
 
 app = FastAPI(title="Log Management Demo")
@@ -9,6 +10,9 @@ PARSERS = {
     "crowdstrike": crowdstrike.parse,
     "firewall": firewall.parse,
     "network": network.parse,
+    "aws": aws.parse,
+    "m365": m365.parse,
+    "ad": ad.parse,
 }
 
 
@@ -22,11 +26,10 @@ def health():
     return {"status": "ok"}
 
 
-@app.post("/ingest")
-def ingest(payload: dict):
+def process(payload: dict) -> str:
     if "tenant" not in payload:
         raise HTTPException(status_code=400, detail="tenant is required")
-    payload["tenant"] = payload["tenant"].lower()   # <-- เพิ่มบรรทัดนี้
+    payload["tenant"] = payload["tenant"].lower()
     source = payload.get("source", "api")
     parser = PARSERS.get(source)
     if parser is None:
@@ -35,8 +38,31 @@ def ingest(payload: dict):
         doc = parser(payload)
     except (KeyError, ValueError) as e:
         raise HTTPException(status_code=400, detail=f"parse error: {e}")
-    idx = storage.save(doc)
-    return {"indexed": idx}
+    return storage.save(doc)
+
+
+@app.post("/ingest")
+def ingest(payload: dict):
+    return {"indexed": process(payload)}
+
+
+@app.post("/ingest/file")
+async def ingest_file(file: UploadFile = File(...)):
+    content = (await file.read()).decode("utf-8")
+    try:
+        data = json.loads(content)
+        events = data if isinstance(data, list) else [data]
+    except json.JSONDecodeError:
+        # รองรับ NDJSON (หนึ่งบรรทัดต่อหนึ่ง event)
+        events = [json.loads(l) for l in content.splitlines() if l.strip()]
+    ok, failed = 0, []
+    for i, ev in enumerate(events):
+        try:
+            process(ev)
+            ok += 1
+        except HTTPException as e:
+            failed.append({"line": i, "error": e.detail})
+    return {"total": len(events), "indexed": ok, "failed": failed}
 
 
 @app.get("/search")
