@@ -17,6 +17,15 @@ services:
       - "8000:8000"
     depends_on:
       - opensearch
-
+  syslog:
+    build: ./ingest
+    environment:
+      - BACKEND_URL=http://backend:8000/ingest
+      - SYSLOG_TENANT=demoa
+    ports:
+      - "514:514/udp"
+      - "514:514/tcp"
+    depends_on:
+      - backend
 volumes:
   osdata:

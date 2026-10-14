@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from parsers import api, crowdstrike
+from parsers import api, crowdstrike, firewall, network
 import storage
 
 app = FastAPI(title="Log Management Demo")
@@ -7,6 +7,8 @@ app = FastAPI(title="Log Management Demo")
 PARSERS = {
     "api": api.parse,
     "crowdstrike": crowdstrike.parse,
+    "firewall": firewall.parse,
+    "network": network.parse,
 }
 
 
@@ -29,7 +31,10 @@ def ingest(payload: dict):
     parser = PARSERS.get(source)
     if parser is None:
         raise HTTPException(status_code=400, detail=f"unsupported source: {source}")
-    doc = parser(payload)
+    try:
+        doc = parser(payload)
+    except (KeyError, ValueError) as e:
+        raise HTTPException(status_code=400, detail=f"parse error: {e}")
     idx = storage.save(doc)
     return {"indexed": idx}
 
