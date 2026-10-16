@@ -13,19 +13,26 @@ services:
   backend:
     build: ./backend
     env_file: .env
+    environment:
+      - USERS_FILE=/data/users.json
     ports:
       - "8000:8000"
+    volumes:
+      - ./data:/data
     depends_on:
       - opensearch
+
   syslog:
     build: ./ingest
     environment:
       - BACKEND_URL=http://backend:8000/ingest
       - SYSLOG_TENANT=demoa
+      - INGEST_API_KEY=${INGEST_API_KEY}
     ports:
       - "514:514/udp"
       - "514:514/tcp"
     depends_on:
       - backend
+
 volumes:
   osdata:

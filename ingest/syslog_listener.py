@@ -5,7 +5,8 @@ import requests
 
 BACKEND = os.environ.get("BACKEND_URL", "http://backend:8000/ingest")
 TENANT = os.environ.get("SYSLOG_TENANT", "demoa")
-PORT = int(os.environ.get("SYSLOG_PORT", "514"))
+PORT = int(os.environ.get("SYSLOG_PORT", "514")) 
+API_KEY = os.environ.get("INGEST_API_KEY", "dev-ingest-key")
 
 
 def classify(line: str) -> str:
@@ -20,7 +21,8 @@ def forward(line: str):
     try:
         r = requests.post(
             BACKEND,
-            json={"tenant": TENANT, "source": classify(line), "message": line},
+            json={"tenant": TENANT, "source": classify(line), "message": line}, 
+            headers={"X-API-Key": API_KEY},
             timeout=5,
         )
         if r.status_code != 200:
