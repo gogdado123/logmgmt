@@ -92,15 +92,10 @@ async def ingest_file(file: UploadFile = File(...)):
             failed.append({"line": i, "error": e.detail})
     return {"total": len(events), "indexed": ok, "failed": failed}
 
+TOP_FIELDS = {"src_ip", "dst_ip", "user", "host", "event_type", "source", "action", "tenant"}
 
-# ---------- Search ----------
-@app.get("/search")
-def search(
-    q: str = "*",
-    size: int = 20,
-    tenant: str | None = None,
-    user: dict = Depends(auth.current_user),
-):
+
+def build_query(user, q, tenant, source, start, end):
     if tenant:
         tenants = [auth.check_tenant(user, tenant)]
     elif "*" in user["tenants"]:
@@ -111,11 +106,83 @@ def search(
     filters = []
     if tenants is not None:
         filters.append({"terms": {"tenant": tenants}})
-    body = {
-        "size": min(size, 200),
-        "sort": [{"@timestamp": "desc"}],
-        "query": {"bool": {"filter": filters, "must": [{"query_string": {"query": q}}]}},
-    }
+    if source:
+        filters.append({"term": {"source": source}})
+    if start or end:
+        rng = {}
+        if start:
+            rng["gte"] = start
+        if end:
+            rng["lte"] = end
+        filters.append({"range": {"@timestamp": rng}})
+
+    query = {"bool": {"filter": filters, "must": [{"query_string": {"query": q}}]}}
     index = "logs-*" if tenants is None else ",".join(f"logs-{t}-*" for t in tenants)
-    res = storage.client.search(index=index, body=body, ignore_unavailable=True)
+    return index, query
+# ---------- Search ----------
+@app.get("/search")
+def search(
+    q: str = "*",
+    size: int = 50,
+    tenant: str | None = None,
+    source: str | None = None,
+    start: str | None = None,
+    end: str | None = None,
+    user: dict = Depends(auth.current_user),
+):
+    index, query = build_query(user, q, tenant, source, start, end)
+    body = {"size": min(size, 200), "sort": [{"@timestamp": "desc"}], "query": query}
+    try:
+        res = storage.client.search(index=index, body=body, ignore_unavailable=True)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"bad query: {e}")
     return [h["_source"] for h in res["hits"]["hits"]]
+
+
+@app.get("/stats/top")
+def stats_top(
+    field: str = "src_ip",
+    n: int = 10,
+    q: str = "*",
+    tenant: str | None = None,
+    source: str | None = None,
+    start: str | None = None,
+    end: str | None = None,
+    user: dict = Depends(auth.current_user),
+):
+    if field not in TOP_FIELDS:
+        raise HTTPException(status_code=400, detail=f"field must be one of {sorted(TOP_FIELDS)}")
+    index, query = build_query(user, q, tenant, source, start, end)
+    body = {
+        "size": 0,
+        "query": query,
+        "aggs": {"top": {"terms": {"field": field, "size": min(n, 50)}}},
+    }
+    res = storage.client.search(index=index, body=body, ignore_unavailable=True)
+    return [{"key": b["key"], "count": b["doc_count"]} for b in res["aggregations"]["top"]["buckets"]]
+
+
+@app.get("/stats/timeline")
+def stats_timeline(
+    interval: str = "1h",
+    q: str = "*",
+    tenant: str | None = None,
+    source: str | None = None,
+    start: str | None = None,
+    end: str | None = None,
+    user: dict = Depends(auth.current_user),
+):
+    if interval not in {"1m", "5m", "15m", "1h", "1d"}:
+        raise HTTPException(status_code=400, detail="interval must be 1m, 5m, 15m, 1h or 1d")
+    index, query = build_query(user, q, tenant, source, start, end)
+    body = {
+        "size": 0,
+        "query": query,
+        "aggs": {"t": {"date_histogram": {"field": "@timestamp", "fixed_interval": interval}}},
+    }
+    res = storage.client.search(index=index, body=body, ignore_unavailable=True)
+    return [
+        {"time": b["key_as_string"], "count": b["doc_count"]}
+        for b in res["aggregations"]["t"]["buckets"]
+        if b["doc_count"] > 0
+    ]
