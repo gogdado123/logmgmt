@@ -1,0 +1,26 @@
+[
+  {
+    "username": "admin",
+    "password_hash": "$2b$12$Nq/4bsyjhpv31aDRm5DnvuNe1XTvLfcvMuWzjntvNyJEyoSZsTAlC",
+    "role": "admin",
+    "tenants": [
+      "*"
+    ]
+  },
+  {
+    "username": "viewerA",
+    "password_hash": "$2b$12$S0ionU5bYjzsjZDYazXfMuXu6T5ynpqJVGcveYe3oov0NP6zeW7ue",
+    "role": "viewer",
+    "tenants": [
+      "demoa"
+    ]
+  },
+  {
+    "username": "viewerB",
+    "password_hash": "$2b$12$lE0luyXpy4Bk1cV6vuDqIuWS0Tj6JnzHJoll9ELgpAi0MUS5ewZ3S",
+    "role": "viewer",
+    "tenants": [
+      "demob"
+    ]
+  }
+]
