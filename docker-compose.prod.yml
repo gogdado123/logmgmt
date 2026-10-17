@@ -1,0 +1,54 @@
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.15.0
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+    volumes:
+      - osdata:/usr/share/opensearch/data
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      - USERS_FILE=/data/users.json
+    volumes:
+      - ./data:/data
+    depends_on:
+      - opensearch
+    restart: unless-stopped
+
+  syslog:
+    build: ./ingest
+    environment:
+      - BACKEND_URL=http://backend:8000/ingest
+      - SYSLOG_TENANT=${SYSLOG_TENANT:-demoa}
+      - INGEST_API_KEY=${INGEST_API_KEY}
+    ports:
+      - "514:514/udp"
+      - "514:514/tcp"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  caddy:
+    build: ./frontend
+    environment:
+      - SITE_ADDRESS=${SITE_ADDRESS:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  osdata:
+  caddy_data:
+  caddy_config:

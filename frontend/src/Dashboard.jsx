@@ -99,7 +99,7 @@ export default function Dashboard({ me }) {
         <TopChart title="Top Event Type" data={types} />
       </div>
 
-      <h4 style={{ marginTop: 40 }}>Events ({rows.length})</h4>
+      <h4 style={{ marginTop: 100 }}>Events ({rows.length})</h4>
       <div style={{ overflowX: 'auto' }}>
         <table border="1" cellPadding="4" style={{ borderCollapse: 'collapse', width: '100%', fontSize: 13 }}>
           <thead>
