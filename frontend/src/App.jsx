@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { api, getToken, setToken } from './api'
 import Login from './Login'
 import Dashboard from './Dashboard'
+import Alerts from './Alerts'
 
 export default function App() {
   const [me, setMe] = useState(null)
   const [checking, setChecking] = useState(!!getToken())
+  const [tab, setTab] = useState('dashboard')
 
   useEffect(() => {
     if (!getToken()) return
@@ -18,13 +20,17 @@ export default function App() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 16px', background: '#1f2937', color: '#fff' }}>
-        <b>Log Management</b>
+        <span>
+          <b>Log Management</b>{' '}
+          <button onClick={() => setTab('dashboard')} disabled={tab === 'dashboard'}>Dashboard</button>{' '}
+          <button onClick={() => setTab('alerts')} disabled={tab === 'alerts'}>Alerts</button>
+        </span>
         <span>
           {me.username} ({me.role}){' '}
           <button onClick={() => { setToken(''); setMe(null) }}>logout</button>
         </span>
       </div>
-      <Dashboard me={me} />
+      {tab === 'dashboard' ? <Dashboard me={me} /> : <Alerts />}
     </div>
   )
 }

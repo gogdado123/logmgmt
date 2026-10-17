@@ -1,11 +1,12 @@
 import json
-
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from pydantic import BaseModel
-
 import auth
 import storage
 from parsers import ad, api, aws, crowdstrike, firewall, m365, network
+import asyncio
+import alerts
+import retention 
 
 app = FastAPI(title="Log Management Demo")
 
@@ -21,8 +22,11 @@ PARSERS = {
 
 
 @app.on_event("startup")
-def startup():
+async def startup():
     storage.ensure_template()
+    alerts.ensure_index()
+    asyncio.create_task(alerts.loop())
+    asyncio.create_task(retention.loop())
 
 
 @app.get("/health")
@@ -185,4 +189,27 @@ def stats_timeline(
         {"time": b["key_as_string"], "count": b["doc_count"]}
         for b in res["aggregations"]["t"]["buckets"]
         if b["doc_count"] > 0
-    ]
+    ] 
+
+# ---------- Alerts ----------
+@app.get("/alerts")
+def list_alerts(size: int = 50, user: dict = Depends(auth.current_user)):
+    filters = []
+    if "*" not in user["tenants"]:
+        filters.append({"terms": {"tenant": user["tenants"]}})
+    res = storage.client.search(index="alerts", body={
+        "size": min(size, 200),
+        "sort": [{"@timestamp": "desc"}],
+        "query": {"bool": {"filter": filters}},
+    })
+    return [h["_source"] for h in res["hits"]["hits"]]
+
+
+@app.post("/admin/retention/run")
+def run_retention(user: dict = Depends(auth.require_admin)):
+    return {"deleted": retention.purge_once()}
+
+
+@app.post("/admin/alerts/check")
+def run_alert_check(user: dict = Depends(auth.require_admin)):
+    return {"created": alerts.check_once()}

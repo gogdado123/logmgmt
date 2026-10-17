@@ -4,4 +4,5 @@ opensearch-py
 pydantic
 python-multipart
 PyJWT
-bcrypt
+bcrypt 
+requests
