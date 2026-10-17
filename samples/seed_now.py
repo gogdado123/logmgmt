@@ -1,9 +1,9 @@
 import json
 import urllib.request
 from datetime import datetime, timedelta, timezone
-
-URL = "http://localhost:8000/ingest"
-KEY = "dev-ingest-key"
+import os
+URL = os.environ.get("INGEST_URL", "http://localhost:8000/ingest")
+KEY = os.environ.get("INGEST_API_KEY", "dev-ingest-key")
 
 
 def post(doc):
