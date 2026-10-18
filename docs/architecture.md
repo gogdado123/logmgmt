@@ -33,7 +33,7 @@ flowchart LR
 ## Components
 
 | Component | หน้าที่ |
----------------------
+|---|---|
 | **Caddy** | เสิร์ฟหน้าเว็บ static, proxy `/api/*` ไป backend (ตัด prefix `/api`), ออก/ต่ออายุใบรับรอง HTTPS อัตโนมัติ (Let's Encrypt เมื่อมีโดเมน, internal CA เมื่อเป็น `localhost`) |
 | **backend (FastAPI)** | Auth, ingest, normalize, search/aggregation, alert, retention |
 | **ingest (syslog listener)** | รับ Syslog UDP/TCP พอร์ต 514 แล้วส่งต่อเข้า `POST /ingest` เพื่อให้ parse/normalize ที่เดียวกับทุกแหล่ง |
@@ -43,7 +43,7 @@ flowchart LR
 ## Ingestion
 
 | ช่องทาง | โปรโตคอล | แหล่งที่รองรับ |
------------------------------------
+|---|---|---|
 | Syslog | UDP + TCP 514 | firewall, network (router) |
 | HTTP JSON | `POST /ingest` | api, crowdstrike, aws, m365, ad (และ firewall/network ผ่าน field `message`) |
 | File batch | `POST /ingest/file` (JSON array หรือ NDJSON) | aws, m365, ad และอื่นๆ |
@@ -55,7 +55,7 @@ flowchart LR
 ทุก source ถูกแปลงเป็น Schema กลางใน [schema.md](schema.md) ตัวอย่างการ map
 
 | ต้นทาง | ฟิลด์เดิม | ฟิลด์กลาง |
------------------------------
+|---|---|---|
 | Firewall syslog | `src` `dst` `spt` `dpt` `proto` `policy` | `src_ip` `dst_ip` `src_port` `dst_port` `protocol` `rule_name` |
 | API / M365 / AD / AWS | `ip` | `src_ip` |
 | AD | `event_id` 4624 / 4625 | `event_type` LogonSuccess / LogonFailed, `action=login`, `event_subtype=<event_id>` |
@@ -75,7 +75,7 @@ flowchart LR
 ## Security
 
 | หัวข้อ | การทำงาน |
--------------------
+|---|---|
 | AuthN | `POST /auth/login` ตรวจรหัสผ่านด้วย bcrypt, ออก JWT (HS256, อายุ 8 ชม.) |
 | AuthZ / RBAC | `admin` เข้าถึงทุก tenant และเรียก `/admin/*`; `viewer` เห็นเฉพาะ tenant ของตน |
 | Ingest | ใช้ API key (`X-API-Key`) แยกจาก JWT เพราะผู้ส่งเป็นระบบ ไม่ใช่คน |
@@ -101,7 +101,7 @@ flowchart LR
 ## เหตุผลการเลือกเทคโนโลยี
 
 | ตัวเลือก | เหตุผล | ทางเลือกที่พิจารณา |
-------------------------------------
+|---|---|---|
 | OpenSearch | Full-text + aggregation ครบ, index รายวันต่อ tenant ทำ retention และแยก tenant ได้ตรงไปตรงมา | ClickHouse (เร็วมากแต่ search ข้อความอิสระน้อยกว่า), Postgres+GIN (เบาแต่ aggregation ช้ากว่าเมื่อข้อมูลโต) |
 | FastAPI | ภาษาเดียวกับ parser และ listener, เขียน test ง่าย, dependency injection เหมาะกับ auth | Express, NestJS |
 | Parser เขียนเอง | ควบคุมการ map ฟิลด์และ unit test ได้ชัด | Vector/Logstash (ต้องเรียนรู้ DSL เพิ่ม ใน 10 วัน) |

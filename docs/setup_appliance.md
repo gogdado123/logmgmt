@@ -27,7 +27,7 @@ echo "vm.max_map_count=262144" | sudo tee /etc/sysctl.d/99-opensearch.conf
 ## 3. ดึงโค้ด
 
 ```bash
-git clone https://github.com/gogdado123/logmgmt.git logmgmt
+git clone <REPO_URL> logmgmt
 cd logmgmt
 ```
 

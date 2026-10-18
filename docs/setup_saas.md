@@ -7,7 +7,7 @@ URL เดโม: `https://gogdado-logmgmt.duckdns.org`
 ## 1. สร้าง VM บน Azure
 
 | หัวข้อ | ค่าที่ใช้ |
------------------
+|---|---|
 | Subscription | Azure for Students |
 | Region | Southeast Asia |
 | Image | Ubuntu Server 24.04 LTS |
@@ -20,7 +20,7 @@ URL เดโม: `https://gogdado-logmgmt.duckdns.org`
 ## 2. เปิด Firewall (Network Security Group)
 
 | Priority | ชื่อ | พอร์ต | โปรโตคอล |
-------------------------------------
+|---|---|---|---|
 | 300 | SSH | 22 | TCP (แนะนำจำกัด Source เป็น IP ผู้ดูแล) |
 | 310 | allow-http-80 | 80 | TCP (Caddy ใช้พิสูจน์โดเมนกับ Let's Encrypt) |
 | 320 | allow-https-443 | 443 | TCP |
@@ -141,6 +141,6 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ## ความปลอดภัยและค่าใช้จ่าย
 
-- เปลี่ยนรหัสผ่านผู้ใช้ `JWT_SECRET` และ `INGEST_API_KEY` ให้ต่างจากค่าเดโมเสมอ และสุ่มใหม่ทันทีหากค่าเคยหลุด
+- เปลี่ยนรหัสผ่านผู้ใช้ `JWT_SECRET` และ `INGEST_API_KEY` ให้ต่างจากค่าเดโมเสมอ และสุ่มใหม่ทันทีหากค่าเคยหลุด (เช่น อยู่ในภาพหน้าจอ/แชท)
 - จำกัด Source ของกฎ SSH และ Syslog (514) เป็น IP ที่ใช้งานจริง
-- หลังจบการประเมิน ให้ลบ Resource group logmgmt-rg ทั้งก้อนเพื่อไม่ให้เสียเครดิต (หรืออย่างน้อย Stop แบบ Deallocate)
+- หลังจบการประเมิน ให้ลบ Resource group `logmgmt-rg` ทั้งก้อนเพื่อไม่ให้เสียเครดิต (หรืออย่างน้อย Stop แบบ Deallocate)
