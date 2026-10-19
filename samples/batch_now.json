@@ -1,0 +1,41 @@
+[
+  {
+    "tenant": "demoB",
+    "source": "aws",
+    "cloud": {
+      "service": "iam",
+      "account_id": "123456789012",
+      "region": "ap-southeast-1"
+    },
+    "event_type": "CreateUser",
+    "user": "admin",
+    "@timestamp": "2026-10-19T07:30:08Z",
+    "raw": {
+      "eventName": "CreateUser",
+      "requestParameters": {
+        "userName": "temp-user"
+      }
+    }
+  },
+  {
+    "tenant": "demoB",
+    "source": "m365",
+    "event_type": "UserLoggedIn",
+    "user": "bob@demo.local",
+    "ip": "198.51.100.23",
+    "status": "Success",
+    "workload": "Exchange",
+    "@timestamp": "2026-10-19T07:31:08Z"
+  },
+  {
+    "tenant": "demoA",
+    "source": "ad",
+    "event_id": 4625,
+    "event_type": "LogonFailed",
+    "user": "demo\\eve",
+    "host": "DC01",
+    "ip": "203.0.113.77",
+    "logon_type": 3,
+    "@timestamp": "2026-10-19T07:32:08Z"
+  }
+]

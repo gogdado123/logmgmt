@@ -1,0 +1,11 @@
+# Use this workspace to collaborate
+workspace:
+  id: 99e435ba-f929-4116-873a-047dbb10a91c
+
+localResources:
+  collections:
+    - ../logmgmt.postman_collection.json
+
+cloudResources:
+  collections:
+    ../postman/collections/Log Management Demo: 2dd2f5c1-029b-4bc0-a2b6-a22fd53bca8b

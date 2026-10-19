@@ -1,0 +1,13 @@
+$kind: http-request
+description: ลบ index logs-* ที่เก่ากว่า RETENTION_DAYS (7 วัน)
+url: "{{baseUrl}}/admin/retention/run"
+method: POST
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+scripts:
+  - type: afterResponse
+    code: pm.test("status is 200", function () { pm.response.to.have.status(200); });
+    language: text/javascript
+order: 4000

@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/search?source=ad&q=*"
+method: GET
+queryParams:
+  source: ad
+  q: "*"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+scripts:
+  - type: afterResponse
+    code: pm.test("status is 200", function () { pm.response.to.have.status(200); });
+    language: text/javascript
+order: 2000

@@ -1,0 +1,13 @@
+$kind: http-request
+description: ส่ง login ล้มเหลว >= 5 ครั้งจาก IP เดียวใน 5 นาที (เช่น python samples/seed_now.py) แล้วเรียกอันนี้
+url: "{{baseUrl}}/admin/alerts/check"
+method: POST
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+scripts:
+  - type: afterResponse
+    code: pm.test("status is 200", function () { pm.response.to.have.status(200); });
+    language: text/javascript
+order: 3000

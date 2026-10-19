@@ -1,0 +1,20 @@
+$kind: http-request
+description: ส่งบรรทัด syslog ผ่าน HTTP โดยระบุ source=firewall และ field message
+url: "{{baseUrl}}/ingest"
+method: POST
+headers:
+  X-API-Key: "{{ingestKey}}"
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "tenant": "demoA",
+      "source": "firewall",
+      "message": "<134>Aug 20 12:44:56 fw01 vendor=demo product=ngfw action=deny src=10.0.1.10 dst=8.8.8.8 spt=5353 dpt=53 proto=udp msg=DNS blocked policy=Block-DNS"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("status is 200", function () { pm.response.to.have.status(200); });
+    language: text/javascript
+order: 6000

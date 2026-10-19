@@ -1,0 +1,13 @@
+$kind: http-request
+name: viewerA -> /admin/retention/run (expect 403)
+url: "{{baseUrl}}/admin/retention/run"
+method: POST
+auth:
+  type: bearer
+  credentials:
+    token: "{{viewerToken}}"
+scripts:
+  - type: afterResponse
+    code: pm.test("status is 403", function () { pm.response.to.have.status(403); });
+    language: text/javascript
+order: 3000

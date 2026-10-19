@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/ingest"
+method: POST
+headers:
+  X-API-Key: "{{ingestKey}}"
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "tenant": "demoA",
+      "source": "api",
+      "event_type": "app_login_failed",
+      "user": "alice",
+      "ip": "203.0.113.7",
+      "reason": "wrong_password",
+      "@timestamp": "{{$isoTimestamp}}"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("status is 200", function () { pm.response.to.have.status(200); });
+    language: text/javascript
+order: 1000

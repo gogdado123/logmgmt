@@ -1,0 +1,14 @@
+$kind: collection
+description: |-
+  Collection สำหรับทดสอบ ingest / search / stats / alerts / RBAC
+
+  ตั้งค่า collection variables: baseUrl, ingestKey, adminPassword, viewerPassword แล้วรัน 'Login (admin)' ก่อน
+variables:
+  baseUrl: https://gogdado-logmgmt.duckdns.org/api
+  ingestKey: ""
+  adminUser: admin
+  adminPassword: ""
+  viewerUser: viewerA
+  viewerPassword: ""
+  token: ""
+  viewerToken: ""

@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/stats/top?field=src_ip&n=10"
+method: GET
+queryParams:
+  field: src_ip
+  n: "10"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+scripts:
+  - type: afterResponse
+    code: pm.test("status is 200", function () { pm.response.to.have.status(200); });
+    language: text/javascript
+order: 5000

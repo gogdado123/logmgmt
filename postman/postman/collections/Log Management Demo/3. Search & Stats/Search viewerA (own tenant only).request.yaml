@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/search?q=*"
+method: GET
+queryParams:
+  q: "*"
+auth:
+  type: bearer
+  credentials:
+    token: "{{viewerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("status is 200", function () { pm.response.to.have.status(200); });
+      const rows = pm.response.json();
+      pm.test("only tenant demoa", function () { rows.forEach(r => pm.expect(r.tenant).to.eql("demoa")); });
+    language: text/javascript
+order: 4000

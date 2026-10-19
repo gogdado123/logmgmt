@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/alerts"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{viewerToken}}"
+scripts:
+  - type: afterResponse
+    code: pm.test("status is 200", function () { pm.response.to.have.status(200); });
+    language: text/javascript
+order: 2000

@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/ingest"
+method: POST
+headers:
+  X-API-Key: "{{ingestKey}}"
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "tenant": "demoB",
+      "source": "m365",
+      "event_type": "UserLoggedIn",
+      "user": "bob@demo.local",
+      "ip": "198.51.100.23",
+      "status": "Success",
+      "workload": "Exchange",
+      "@timestamp": "{{$isoTimestamp}}"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("status is 200", function () { pm.response.to.have.status(200); });
+    language: text/javascript
+order: 4000

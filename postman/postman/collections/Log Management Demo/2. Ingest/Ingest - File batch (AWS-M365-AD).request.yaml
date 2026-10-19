@@ -1,0 +1,18 @@
+$kind: http-request
+name: Ingest - File batch (AWS/M365/AD)
+description: เลือกไฟล์ samples/batch_aws_m365_ad.json ในช่อง file ก่อนส่ง (ไฟล์ตัวอย่าง timestamp ปี 2025 จะถูก Retention ลบ)
+url: "{{baseUrl}}/ingest/file"
+method: POST
+headers:
+  X-API-Key: "{{ingestKey}}"
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src: []
+scripts:
+  - type: afterResponse
+    code: pm.test("status is 200", function () { pm.response.to.have.status(200); });
+    language: text/javascript
+order: 7000

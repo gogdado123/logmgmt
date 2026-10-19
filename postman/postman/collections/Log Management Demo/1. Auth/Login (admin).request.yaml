@@ -1,0 +1,23 @@
+$kind: http-request
+description: ล็อกอินและเก็บ token ลงตัวแปร token อัตโนมัติ
+url: "{{baseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "{{adminUser}}",
+      "password": "{{adminPassword}}"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("status is 200", function () { pm.response.to.have.status(200); });
+      const j = pm.response.json();
+      pm.collectionVariables.set("token", j.access_token);
+    language: text/javascript
+order: 1000

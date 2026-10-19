@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/stats/top?field=event_type"
+method: GET
+queryParams:
+  field: event_type
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+scripts:
+  - type: afterResponse
+    code: pm.test("status is 200", function () { pm.response.to.have.status(200); });
+    language: text/javascript
+order: 7000
