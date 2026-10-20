@@ -1,7 +1,14 @@
 import json
 import urllib.request
 from datetime import datetime, timedelta, timezone
-import os
+import os 
+
+CTX = ssl.create_default_context()
+if os.environ.get("INSECURE") == "1":
+    CTX.check_hostname = False
+    CTX.verify_mode = ssl.CERT_NONE 
+
+
 URL = os.environ.get("INGEST_URL", "http://localhost:8000/ingest")
 KEY = os.environ.get("INGEST_API_KEY", "dev-ingest-key")
 
@@ -11,7 +18,7 @@ def post(doc):
         URL, data=json.dumps(doc).encode(),
         headers={"Content-Type": "application/json", "X-API-Key": KEY},
     )
-    urllib.request.urlopen(req).read()
+    urllib.request.urlopen(req, context=CTX).read()
 
 
 def ts(minutes_ago):
