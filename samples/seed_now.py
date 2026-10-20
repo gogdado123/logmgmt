@@ -2,6 +2,7 @@ import json
 import urllib.request
 from datetime import datetime, timedelta, timezone
 import os 
+import ssl 
 
 CTX = ssl.create_default_context()
 if os.environ.get("INSECURE") == "1":
